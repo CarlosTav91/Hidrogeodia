@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geomática para la Gestión Hídrica</title>
+  
+  <!-- Carga de estilos de Reveal.js (se utiliza un único tema: black) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
+  
+  <!-- Carga de Chart.js para gráficos (usado en la diapositiva de Metodología) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Carga de Animate.css para animaciones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <!-- Carga de Leaflet CSS para mapas -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  
+  <style>
+    /* -----------------------------------------
+       VARIABLES Y ESTILOS GLOBALES
+    ----------------------------------------- */
+    :root {
+      --main-color: #001223;
+      --accent-color: #001223;
+    }
+    .reveal {
+      font-family: 'Open Sans', sans-serif;
+      /* Fondo con imagen y transparencia; la imagen se muestra en el lado derecho */
+      background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)),
+                  url('Imagenes/tierra3.png') no-repeat right center;
+      background-size: 20%;
+      color: #ffffff;
+    }
+    /* Cuadrícula para diapositivas con dos columnas */
+    .slide-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      height: 100%;
+      align-items: center;
+    }
+    .slide-image {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .slide-content {
+      text-align: left;
+      padding: 1rem;
+      font-size: 35px;
+    }
+    .slide-content h2 {
+      padding: 1rem;
+      color: #e4e4e4;
+    }
+    .slide-number {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    .logo-corner {
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 220px;
+    }
+    .section-title {
+      color: var(--main-color);
+      border-bottom: 3px solid var(--accent-color);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* -----------------------------------------
+       DIAPOSITIVA: Aguas Superficiales (Diseño personalizado)
+    ----------------------------------------- */
+    .aguas-superficiales {
+      background-color: #f0f8ff; /* Fondo azul muy claro */
+      color: #333;
+      font-family: 'Arial', sans-serif;
+      border: 2px solid #3498db;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .aguas-superficiales h2.section-title {
+      color: #3498db;
+      font-size: 32px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      margin-bottom: 1rem;
+    }
+    .aguas-superficiales ul {
+      font-size: 18px;
+      list-style-type: circle;
+      margin-left: 20px;
+    }
+    .aguas-superficiales .slide-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .aguas-superficiales .image-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .aguas-superficiales .image-grid img {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .aguas-superficiales .slide-content {
+      padding: 1rem;
+    }
+    .aguas-superficiales .slide-number {
+      text-align: right;
+      font-size: 16px;
+      margin-top: 10px;
+      color: #3498db;
+    }
+    
+    /* -----------------------------------------
+       DIAPOSITIVA: Herramientas Principales
+    ----------------------------------------- */
+    .herramientas-slide {
+      background-color: #ffffff;
+      color: #333;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    .herramientas-slide h2 {
+      margin-bottom: 20px;
+      font-size: 36px;
+      color: #3498db;
+    }
+    .herramientas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      align-items: center;
+      justify-items: center;
+    }
+    .herramienta-item {
+      border: 2px solid #3498db;
+      padding: 10px;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+      background-color: #f9f9f9;
+    }
+    .herramienta-item:hover {
+      transform: scale(1.05);
+    }
+    .herramienta-item img {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .herramienta-item h3 {
+      margin: 10px 0 5px;
+      font-size: 24px;
+      color: #3498db;
+    }
+    .herramienta-item p {
+      font-size: 16px;
+      margin: 0;
+    }
+    
+    /* -----------------------------------------
+       DIAPOSITIVA: Recolección de Datos con SIG y Logos
+    ----------------------------------------- */
+    .sig-logos {
+      background-color: #5268cb;  /* Fondo oscuro */
+      color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .sig-logos h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .logos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+      justify-items: center;
+    }
+    .logos-grid img {
+      width: 100%;
+      max-width: 150px;
+      height: auto;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .sig-logos p {
+      font-size: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: justify;
+      line-height: 1.5;
+    }
+    
+    /* -----------------------------------------
+       DIAPOSITIVA: Contenedor para el Mapa (Casos de Estudio)
+    ----------------------------------------- */
+    #map {
+      width: 100%;
+      height: 700px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    
+    /* (Otros estilos se mantienen para la metodología, etc.) */
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <!-- PORTADA -->
+      <section>
+	   <img src="Imagenes/logoUIS.webp" alt="Logo" class="logo-corner">
+        <div class="slide-grid">
+		<iframe
+          <img src="https://drive.google.com/file/d/1l_afpUXzcSumTpFPoEQ6rW-HMm5dEPZL/preview" alt="Portada" class="slide-image">
+		  </iframe>
+		  
+		  <div class="slide-content">
+            <h2>Geomática Aplicada al Manejo Hídrico</h2>
+            <p>Carlos Alberto Tavera Sanabria</p>
+            <p>Fecha: 21-03-2025</p>
+          </div>
+        </div>
+        <div class="slide-number">1/15</div>
+      </section>
+      
+      <!-- INTRODUCCIÓN -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+          <img src="https://drive.google.com/file/d/16irp6tv12SAPkH6iQe5QQr-TizLVam2u/preview" alt="Portada" class="slide-image">
+		  </iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Introducción</h2>
+            <small>
+              <p style="text-align: justify;">
+                En un contexto de crecientes desafíos ambientales y demandas sobre nuestros recursos hídricos, la geomática se posiciona como una herramienta esencial para optimizar la gestión del agua. Esta charla explorará cómo tecnologías como los Sistemas de Información Geográfica, la teledetección y el modelado espacial permiten tomar decisiones más informadas y sostenibles, mejorando la planificación y el monitoreo de los recursos hídricos. A lo largo de esta presentación, conoceremos casos de éxito, metodologías innovadoras y perspectivas futuras para enfrentar los retos actuales en el manejo integrado del agua.
+              </p>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">2/15</div>
+      </section>
+      
+      <!-- TABLA DE CONTENIDO -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+          <img src="https://drive.google.com/file/d/1S_gaJr-YB43j5P-p_UtUvTqz8xDrs-Jc/preview" alt="Portada" class="slide-image">
+		  </iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Tabla de Contenido</h2>
+            <small>
+              <ul>
+                <li>Fundamentos Geomáticos
+                  <ul>
+                    <li>Definición y alcance</li>
+                    <li>Herramientas principales (SIG, teledetección, GNSS, etc.)</li>
+                  </ul>
+                </li>
+                <li>Metodologías - Recolección y procesamiento de datos</li>
+                <li>Tecnologías Utilizadas
+                  <ul>
+                    <li>Sensores remotos, plataformas SIG y drones</li>
+                    <li>Tecnologías emergentes</li>
+                  </ul>
+                </li>
+                <li>Aguas Superficiales</li>
+                <li>Aguas Subterráneas</li>
+                <li>Casos de Estudio</li>
+              </ul>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">3/15</div>
+      </section>
+      
+      <!-- FUNDAMENTOS GEOMÁTICOS -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+          <img src="https://drive.google.com/file/d/1yGleEctAT6bXJBfzB8RLy8MgjycqoAtx/preview" alt="Portada" class="slide-image">
+		  </iframe>
+          <div class="slide-content">
+            <h2 class="section-title">¿Qué es la Geomática?</h2>
+            <small>
+              <p style="text-align: justify;">
+                La geomática es un campo interdisciplinario que integra tecnologías y metodologías para la captura, procesamiento, análisis, gestión y visualización de datos geoespaciales. Se apoya en herramientas como los Sistemas de Información Geográfica (SIG), teledetección, fotogrametría, cartografía, GNSS y modelado espacial para interpretar y representar la información vinculada a la ubicación y el espacio.
+              </p>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">4/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Aguas Superficiales (con 4 imágenes y animaciones) -->
+      <section class="aguas-superficiales" data-transition="convex">
+        <div class="slide-grid">
+          <div class="image-grid animate__animated animate__fadeInLeft">
+				<iframe
+				<img src="https://drive.google.com/file/d/19Lp4PsNkVLqv0Y8dsWeQHyMUEtuU_C0f/preview" alt="Portada" class="slide-image">
+				</iframe>
+				<iframe
+				<img src="https://drive.google.com/file/d/1kEFF1boQD1ZVwIKg4Yik-kHXZ1V9H7LN/preview" alt="Portada" class="slide-image">
+				</iframe>
+				
+			</div>
+          <div class="slide-content animate__animated animate__fadeInRight">
+            <h2 class="section-title">Alcances y Aplicaciones</h2>
+            <ul>
+              <li>Gestión Ambiental y de Recursos Naturales</li>
+              <li>Planificación Territorial y Urbana</li>
+              <li>Gestión de Desastres y Riesgos</li>
+              <li>Agricultura de Precisión</li>
+              <li>Transporte y Logística</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-number">5/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Herramientas Principales -->
+      <section class="herramientas-slide" data-transition="fade">
+        <h2>Herramientas Principales</h2>
+        <div class="herramientas-grid">
+          <div class="herramienta-item">
+            <iframe
+				<img src="https://drive.google.com/file/d/17cygYXjXKSrX8OanHoA7-pkR90eaGrjb/preview" alt="Portada" class="slide-image">
+				</iframe>
+            <h3>SIG</h3>
+            <p>Sistemas de Información Geográfica</p>
+          </div>
+          <div class="herramienta-item">
+            <iframe
+				<img src="https://drive.google.com/file/d/1E7kzjpM2xR5uGZFzuIpCu6BzGx8nFCIq/preview" alt="Portada" class="slide-image">
+				</iframe>
+            <h3>Teledetección</h3>
+            <p>Análisis de imágenes satelitales</p>
+          </div>
+          	
+          <div class="herramienta-item">
+            <iframe
+				<img src="https://drive.google.com/file/d/1Av_6aRAgyo6b51YABgR8M1vvOyOzjEZ8/preview" alt="Portada" class="slide-image">
+				</iframe>
+            <h3>Otros</h3>
+            <p>Fotogrametría, modelado, etc.</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Recolección de Datos con SIG y Logos -->
+      <section class="sig-logos" data-transition="zoom">
+        <div class="animate__animated animate__fadeInDown">
+          <h2>Recolección de Datos Hidrológicos e Hidrogeológicos con SIG</h2>
+        </div>
+        <div class="logos-grid animate__animated animate__fadeInUp animate__delay-1s">
+          <iframe
+				<img src="https://drive.google.com/file/d/1WAJxNWiy-I1wBCz4gZdNcoIZuUyXkIA9/preview" alt="Portada" class="slide-image">
+				</iframe>
+   
+          <iframe
+				<img src="https://drive.google.com/file/d/1Lf8R-HPf7WFfZPzFuvymVyrQ-V-f43n7/preview" alt="Portada" class="slide-image">
+				</iframe>
+     
+        </div>
+        <div class="animate__animated animate__fadeInUp animate__delay-2s">
+          <p>
+            Los Sistemas de Información Geográfica constituyen una herramienta esencial para el análisis hidrológico e hidrogeológico, ya que permiten integrar datos geoespaciales provenientes de diversas fuentes como imágenes satelitales, sensores remotos, drones y mediciones en campo. Esta integración facilita la identificación de patrones, la evaluación de la distribución y calidad de los recursos hídricos, y el modelado de procesos complejos, apoyando la toma de decisiones estratégicas para la gestión sostenible del agua y la planificación de intervenciones en áreas de riesgo.
+          </p>
+        </div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Teledetección -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/1HwfMW4wjTwKzUFYkgu28nqRQFQ94jUxr/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Teledetección</h2>
+            <small>
+              <p style="text-align: justify;">
+                Entre los satélites más relevantes se encuentran Landsat, Sentinel y MODIS, que ofrecen imágenes de alta resolución para monitorear la extensión y calidad de cuerpos de agua, así como cambios en la cobertura terrestre. Además, sensores especializados, como los altímetros y sistemas radar a bordo de misiones como Sentinel-1, proporcionan mediciones precisas sobre los niveles de agua y la humedad del suelo, apoyando un análisis integral de los recursos hídricos.
+              </p>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">8/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: GNSS -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/1T5cq7r7fy-Za9FHPPbQuavnC-Q9m4yHk/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">GNSS</h2>
+            <small>
+              <p style="text-align: justify;">
+                El Sistema Global de Navegación por Satélite (GNSS) es una herramienta fundamental en hidrología, ya que proporciona datos de posicionamiento con alta precisión que permiten georreferenciar mediciones en campo. Se utiliza para delimitar cuencas hidrográficas, monitorear la evolución de ríos y cuerpos de agua, y establecer la ubicación exacta de sensores y estaciones de monitoreo. Gracias a esta tecnología, es posible integrar de manera precisa la información en sistemas de información geográfica, lo que facilita el análisis y la modelación de procesos hidrológicos para una gestión eficiente y sostenible de los recursos hídricos.
+              </p>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">9/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Fotogrametría - LiDAR -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/1uELKgmaXfcg9iKTpGbP8SoAxXXwnX63o/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Fotogrametría - LiDAR</h2>
+            <small>
+              <p style="text-align: justify;">
+                La fotogrametría y los datos LiDAR son técnicas complementarias que juegan un papel crucial en la recolección de datos hidrológicos y el modelado de cuencas hidrográficas. La fotogrametría utiliza imágenes aéreas para generar modelos digitales de elevación, permitiendo analizar la topografía y la dinámica del flujo de agua en una cuenca. Por su parte, LiDAR, mediante pulsos láser, obtiene mediciones precisas de la superficie, incluso en áreas densamente arboladas, lo que facilita la generación de modelos topográficos de alta resolución.
+              </p>
+            </small>
+          </div>
+        </div>
+        <div class="slide-number">10/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Metodología (con gráfico de Chart.js) -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/107wZDyJ5ekRFNsTjz1LPs9tCnTqQYdGA/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Metodología</h2>
+            <ol>
+              <li>Recolección de datos</li>
+              <li>Procesamiento espacial</li>
+              <li>Análisis integrado</li>
+              <li>Validación de resultados</li>
+            </ol>
+            <!-- Canvas para el gráfico -->
+            <canvas id="tempPrecipChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+        <div class="slide-number">11/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Aguas Superficiales (con 4 imágenes y animaciones) -->
+      <section class="aguas-superficiales" data-transition="convex">
+        <div class="slide-grid">
+          <div class="image-grid animate__animated animate__fadeInLeft">
+            <iframe
+				<img src="https://drive.google.com/file/d/1ia11wHnqBgknfdQgNCtib0x7Dwub_Vyi/preview" alt="Portada" class="slide-image">
+				</iframe>
+			<iframe
+				<img src="https://drive.google.com/file/d/1KBmZp4R4OaBaD9qKj0OIb6q5jttmQLJm/preview" alt="Portada" class="slide-image">
+				</iframe>
+          </div>
+          <div class="slide-content animate__animated animate__fadeInRight">
+            <h2 class="section-title">Aguas Superficiales</h2>
+            <small>
+              <p style="text-align: justify;">
+                El monitoreo de aguas superficiales es fundamental para la gestión integral de los recursos hídricos. Gracias a la combinación de tecnologías como la teledetección, imágenes satelitales y el análisis mediante SIG, es posible detectar cambios en la extensión, calidad y caudal de ríos, lagos y embalses en tiempo real. Esto permite anticipar fenómenos como inundaciones o sequías, evaluar el impacto de actividades antropogénicas y establecer medidas de mitigación y conservación, contribuyendo a una administración más eficiente y sostenible del recurso hídrico.
+              </p>
+            </small>
+            <ul>
+              <li>Monitoreo y gestión de lagos, ríos y embalses</li>
+              <li>Análisis espacial para áreas vulnerables</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-number">12/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Aguas Subterráneas -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/11lFfjA2Dp1r5Xb76GIm0bNNWcQdIf1ot/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Aguas Subterráneas</h2>
+            <ul>
+              <li>Mapas de acuíferos</li>
+              <li>Simulación de flujos</li>
+              <li>Balance hídrico</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-number">13/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Casos de Estudio con Mapa -->
+      <section>
+        <div class="slide-grid">
+          <!-- Contenedor para el mapa -->
+          <div class="image-container">
+            <div id="map"></div>
+          </div>
+          <!-- Contenido textual -->
+          <div class="slide-content">
+            <h2 class="section-title">Aplicaciones: Geovisores</h2>
+            <p style="text-align: justify;">
+              <small>
+              <p style="text-align: justify;">
+                  La geomática se posiciona como una herramienta esencial para la gestión de los recursos hídricos, ya que permite integrar, 
+				  analizar y visualizar datos espaciales de diversas fuentes. Gracias a tecnologías como los SIG, la teledetección, GNSS, LiDAR y fotogrametría, 
+				  es posible monitorear y modelar con precisión fenómenos hidrológicos, anticipar eventos críticos y optimizar la toma de decisiones 
+				  en la planificación y conservación del agua. Este enfoque integral no solo mejora la eficiencia en el uso del recurso, sino que también 
+				  fomenta una gestión sostenible y resiliente frente a los desafíos ambientales actuales y futuros
+              </p>
+            </small>
+            </p>
+          </div>
+        </div>
+        <div class="slide-number">14/15</div>
+      </section>
+      
+      <!-- DIAPOSITIVA: Conclusiones -->
+      <section>
+        <div class="slide-grid">
+          <iframe
+				<img src="https://drive.google.com/file/d/1vVelXVIusAJsjiXm_EWx5OkNY1ovror0/preview" alt="Portada" class="slide-image">
+				</iframe>
+          <div class="slide-content">
+            <h2 class="section-title">Preguntas ? </h2>
+            <ul>
+              <li>Lecciones aprendidas</li>
+              <li>Recomendaciones técnicas</li>
+              <li>Perspectivas futuras</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-number">15/15</div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Scripts de Reveal.js (una sola carga e inicialización) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      center: true,
+      hash: true,
+      transition: 'convex',
+      slideNumber: 'c/t'
+    });
+  </script>
+  
+  <!-- Script para el gráfico de Chart.js en la diapositiva de Metodología -->
+  <script>
+    var ctx = document.getElementById('tempPrecipChart').getContext('2d');
+    var tempPrecipChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        datasets: [
+          {
+            label: 'Temperatura (°C)',
+            data: [22, 23, 25, 28, 30, 27],
+            borderColor: 'red',
+            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+            fill: false,
+            tension: 0.1
+          },
+          {
+            label: 'Precipitación (mm)',
+            data: [120, 100, 140, 160, 180, 150],
+            borderColor: 'blue',
+            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+            fill: false,
+            tension: 0.1,
+            yAxisID: 'precip'
+          }
+        ]
+      },
+      options: {
+        scales: {
+          y: {
+            type: 'linear',
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Temperatura (°C)'
+            }
+          },
+          precip: {
+            type: 'linear',
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            title: {
+              display: true,
+              text: 'Precipitación (mm)'
+            }
+          }
+        }
+      }
+    });
+  </script>
+  
+  <!-- Script para el mapa de Casos de Estudio con Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    // Inicializar el mapa cuando la diapositiva de Casos de Estudio esté activa
+    Reveal.on('slidechanged', function(event) {
+      if (event.currentSlide.querySelector('#map') && !window.mapInitialized) {
+        // Inicializa el mapa centrado en Colombia
+        var map = L.map('map').setView([4.5709, -74.2973], 5);
+        
+        // Capa base: CartoDB Light All (sobria)
+        var sobria = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a> contributors',
+          maxZoom: 18
+        }).addTo(map);
+        
+        // Otra base: Stamen Terrain
+        var terreno = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
+                       '<a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> — ' +
+                       'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a>',
+          maxZoom: 16
+        });
+        
+        /* --- Capas Superpuestas --- */
+        // 1. Estaciones GNSS (WMS)
+        var estacionesGNSS = L.tileLayer.wms('https://srvags.sgc.gov.co/arcgis/services/Estaciones_GNSS/Estaciones_GNSS_SGC_2014/MapServer/WMSServer?', {
+          layers: '0',
+          format: 'image/png',
+          transparent: true,
+          attribution: 'Estaciones GNSS SGC 2014'
+        });
+        
+        // 2. Áreas hidrogeológicas (Ejemplo de cuencas o áreas, se usa WMS)
+        var areasHidrogeologicas = L.tileLayer.wms('https://srvags.sgc.gov.co/arcgis/services/AREAS_HIDRO_GEOQ/AREAS_HIDROGRAFICAS_GEOQUIMICAS/MapServer/WMSServer?', {
+          layers: '0',
+          format: 'image/png',
+          transparent: true,
+          attribution: 'Áreas Hidrogeológicas'
+        });
+        
+        // 3. Atlas Geológico (WMS)
+        var atlasGeologico = L.tileLayer.wms('https://srvags.sgc.gov.co/arcgis/services/Atlas_Geologico_2015/Atlas_Geologico_Colombiano_2015/MapServer/WMSServer?', {
+          layers: '0',
+          format: 'image/png',
+          transparent: true,
+          attribution: 'Atlas Geológico Colombiano 2015'
+        });
+        
+        // Marcadores para ciudades principales
+        var ciudades = [
+          { name: "Bogotá", coords: [4.7110, -74.0721] },
+          { name: "Medellín", coords: [6.2442, -75.5812] },
+          { name: "Cali", coords: [3.4516, -76.5320] },
+          { name: "Barranquilla", coords: [10.9685, -74.7813] },
+          { name: "Cartagena", coords: [10.3910, -75.4794] }
+        ];
+        ciudades.forEach(function(ciudad) {
+          L.marker(ciudad.coords).addTo(map)
+            .bindPopup('<b>' + ciudad.name + '</b>');
+        });
+        
+        // Control de capas
+        var baseLayers = {
+          "Base Cartográfica": sobria,
+          "Terreno": terreno
+        };
+        var overlays = {
+          "Estaciones GNSS": estacionesGNSS,
+          "Áreas Hidrogeológicas": areasHidrogeologicas,
+          "Atlas Geológico": atlasGeologico
+        };
+        L.control.layers(baseLayers, overlays, {collapsed: false}).addTo(map);
+        
+        window.mapInitialized = true;
+      }
+    });
+  </script>
+</body>
+</html>
